@@ -25,12 +25,22 @@ public class Linear{
 		System.out.println(cache+"");
 	}
 
+	private static synchronized int getCache(){
+		return cache;
+	}
+	private static synchronized void setCache(int c){
+		cache = c;
+	}
+
 	private static void task(){
-		double j=Math.random()*100;
+		int j = getCache();
 
 		for (long i = 0; i< 1000000000; i++){
 			if (j < 100000) j++;
-			else j=1;
+			else{
+				 j=1;
+				setCache((int)Math.random()*100);
+			}
 		}
 		System.out.println(j);
 	}
