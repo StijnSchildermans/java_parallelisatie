@@ -1,10 +1,12 @@
 import java.util.stream.IntStream;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 public class PascalTriangleParallelStreams{
 
 	private Integer[][] points;
 
-	public PascalTriangleParallelStreams(int size){
+	/*public PascalTriangleParallelStreams(int size){
 
 		points = IntStream.range(0,size).boxed()
 				.parallel()
@@ -12,7 +14,7 @@ public class PascalTriangleParallelStreams{
 						.map(col->PascalTriangle.getValueAtPoint(row,col))
 						.toArray(Integer[]::new))
 				.toArray(Integer[][]::new);
-	}
+	}*/
 
 	//System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "30");
 
@@ -30,4 +32,25 @@ public class PascalTriangleParallelStreams{
 
 	//Triangles.print(points);
 
+
+
+
+	public PascalTriangleParallelStreams(int size){
+        ForkJoinPool pool = new ForkJoinPool(30);
+       
+        points = IntStream.range(0,size).boxed()
+                .map(row -> pool.submit(()-> IntStream.range(0,row+1).boxed()
+                        .map(col->PascalTriangle.getValueAtPoint(row,col))
+                        .toArray(Integer[]::new)))
+                .collect(Collectors.toList())
+                .stream()
+                .map(f -> {
+                        try{
+                            return f.get();
+                        }catch(Exception e){
+                            return null;
+                        }
+                    })
+                .toArray(Integer[][]::new);       
+    }
 }
