@@ -42,7 +42,8 @@ public class Linear{
 				setCache((int)Math.random()*100);
 			}
 		}
-		System.out.println(j);
+		
+		//System.out.println(j);
 	}
 
 	private static void sequential(int size){

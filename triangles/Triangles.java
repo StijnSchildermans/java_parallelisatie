@@ -12,11 +12,13 @@ public class Triangles{
 				case "parallel": switch (args[1]){
 					case "rows": new PascalTriangleParallel(size); break;
 					case "cols": new PascalTriangleParallelCols(size); break;
+					case "rowsCols": new PascalTriangleParallelRowsCols(size); break;
 				} break;
 				case "parallelThreadPool": new PascalTriangleParallelThreadPool(size); break;
 				case "parallelStreams": switch (args[1]){
 					case "rows": new PascalTriangleParallelStreams(size); break;
 					case "cols": new PascalTriangleParallelStreamsCols(size); break;
+					case "rowsCols": new PascalTriangleParallelStreamsRowsCols(size); break;
 				} break;
 				//case "parallelStreamsBeter": new PascalTriangleParallelStreamsBeter(size); break;
 				default: System.out.println("Da ga ni"); break;
