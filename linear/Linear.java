@@ -35,15 +35,15 @@ public class Linear{
 	private static void task(){
 		int j = 0;
 
-		for (long i = 0; i< 1000000; i++){
+		for (long i = 0; i< 100000000; i++){
 			if (j < 100000) j++;
 			else{
 				//j=1;
 				//setCache((int)Math.random()*100);
-				cache = (int)Math.random() * 100;
+				j = (int)Math.random() * 100;
 			}
 		}
-		
+		cache = j;
 		//System.out.println(j);
 	}
 
