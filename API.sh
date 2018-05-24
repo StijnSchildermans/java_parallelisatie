@@ -2,6 +2,6 @@
 
 read MESSAGE
 
-cd ~/java/triangles
+cd ./triangles
 java Triangles "$MESSAGE" rowsCols 30 10
 echo "Done"
