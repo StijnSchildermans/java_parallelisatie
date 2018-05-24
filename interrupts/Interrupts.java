@@ -1,6 +1,6 @@
 public class Interrupts{
 
-	private static long cache;
+	private static volatile long cache;
 
 
 	public static void main(String[] args){
@@ -25,7 +25,7 @@ public class Interrupts{
 
 	private static void task(){
 		long j = 0;
-		for (long i = 0; i < 1000000000; i++){
+		for (long i = 0; i < 100000000; i++){
 			j+=1;
 		}
 		System.out.println(j);
@@ -33,7 +33,7 @@ public class Interrupts{
 
 	private static void taskInterrupt(){
 		long j = 0;
-		for (long i = 0; i < 1000000000; i++){
+		for (long i = 0; i < 100000000; i++){
                         //setCache(getCache()+ 1);
 			cache +=1;
                 }
