@@ -40,7 +40,8 @@ public class Linear{
 			else{
 				//j=1;
 				//setCache((int)Math.random()*100);
-				j = (int)Math.random() * 100;
+				//j = (int)Math.random() * 100;
+				j = 12;
 			}
 		}
 		cache = j;
