@@ -8,10 +8,10 @@ public class Wrapper{
   public /*synchronized*/ void setA(int[] a){
     this.a = a;
   }
-  public int[] getA(){
+  public /*synchronized*/ int[] getA(){
     return a;
   }
-  public void setData(int index, int data){
+  public /*synchronized*/ void setData(int index, int data){
 	this.a[index] = data;
   }
 }
