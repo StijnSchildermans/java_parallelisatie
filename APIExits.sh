@@ -2,6 +2,6 @@
 
 read MESSAGE
 
-cd ./tlb_shootdown
-java Shootdown
+cd ./exits
+java Exits
 echo "Done"
