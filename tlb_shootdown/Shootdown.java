@@ -6,8 +6,17 @@ public class Shootdown{
   private static int data2;
 
   public static void main(String[] args){
-    manyThreadsThreadPool();
+    String type = args[0];
+    int size = Integer.parseInt(args[1]);
+
+    switch(type){
+      case "threads": manyThreads(size); break;
+      case "threadPool": manyThreadsThreadPool(size); break;
+      default: System.out.println("Da ga ni");
+    }
+    System.out.println(data2+"");
   }
+
   private static void sync(){
     data = new Wrapper();
     Thread[] threads = new Thread[1000];
@@ -30,9 +39,10 @@ public class Shootdown{
       w.setData(i%1024,w.getA()[i%1024]+1);
     }
   }
-  private static void manyThreads(){
-    Thread[] threads = new Thread[10000];
-    for (int i = 0; i < 10000; i++){
+
+  private static void manyThreads(int size){
+    Thread[] threads = new Thread[size];
+    for (int i = 0; i < size; i++){
       final int buffer = i;
       threads[i] = new Thread(Shootdown::runThreadMany);
       threads[i].start();
@@ -46,8 +56,8 @@ public class Shootdown{
       } catch (Exception ex){}
     }
   }
-  private static void manyThreadsThreadPool(){
-    IntStream.range(0,10000)
+  private static void manyThreadsThreadPool(int size){
+    IntStream.range(0,size)
     .parallel()
     .forEach(i->runThreadMany());
   }
