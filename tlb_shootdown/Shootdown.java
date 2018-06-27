@@ -66,6 +66,6 @@ public class Shootdown{
     for (int i = 0; i < 10000000; i++){
       d[i%1024]++;
     }
-    data2+=d[(int)Math.random()*1024];
+    data2+=d[/*(int)Math.random()*1024*/ 1000];
   }
 }
