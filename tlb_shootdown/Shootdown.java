@@ -1,10 +1,12 @@
+import java.util.stream.IntStream;
+
 public class Shootdown{
 
   private static Wrapper data;
   private static int data2;
 
   public static void main(String[] args){
-    manyThreads();
+    manyThreadsThreadPool();
   }
   private static void sync(){
     data = new Wrapper();
@@ -43,6 +45,11 @@ public class Shootdown{
         t.join();
       } catch (Exception ex){}
     }
+  }
+  private static void manyThreadsThreadPool(){
+    IntStream.range(0,10000)
+    .parallel()
+    .forEach(i->runThreadMany());
   }
   private static void runThreadMany(){
     int[] d = new int[1024];
