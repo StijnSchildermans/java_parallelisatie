@@ -744,7 +744,7 @@ void *FragmentRefine(void * targs) {
 }
 #endif //ENABLE_PTHREADS
 
-/* 
+/*
  * Integrate all computationally intensive pipeline
  * stages to improve cache efficiency.
  */
@@ -1248,7 +1248,7 @@ void *Reorder(void * targs) {
       chunks_per_anchor[chunk->sequence.l1num] = chunk->sequence.l2num+1;
     }
 
-    //Put chunk into local cache if it's not next in the sequence 
+    //Put chunk into local cache if it's not next in the sequence
     if(!sequence_eq(chunk->sequence, next)) {
       pos = TreeFind(chunk->sequence.l1num, T);
       if (pos == NULL) {
@@ -1402,17 +1402,17 @@ void Encode(config_t * _conf) {
   assert(!mbuffer_system_init());
 
   /* src file stat */
-  if (stat(conf->infile, &filestat) < 0) 
+  if (stat(conf->infile, &filestat) < 0)
       EXIT_TRACE("stat() %s failed: %s\n", conf->infile, strerror(errno));
 
-  if (!S_ISREG(filestat.st_mode)) 
+  if (!S_ISREG(filestat.st_mode))
     EXIT_TRACE("not a normal file: %s\n", conf->infile);
 #ifdef ENABLE_STATISTICS
   stats.total_input = filestat.st_size;
 #endif //ENABLE_STATISTICS
 
   /* src file open */
-  if((fd = open(conf->infile, O_RDONLY | O_LARGEFILE)) < 0) 
+  if((fd = open(conf->infile, O_RDONLY | O_LARGEFILE)) < 0)
     EXIT_TRACE("%s file open error %s\n", conf->infile, strerror(errno));
 
   //Load entire file into memory if requested by user
@@ -1464,8 +1464,7 @@ void Encode(config_t * _conf) {
    */
   pthread_t threads_anchor[MAX_THREADS],
     threads_chunk[MAX_THREADS],
-    threads_compress[MAX_THREADS],
-    threads_send, threads_process;
+    threads_compress[MAX_THREADS];
 
   data_process_args.tid = 0;
   data_process_args.nqueues = nqueues;
@@ -1476,7 +1475,8 @@ void Encode(config_t * _conf) {
 #endif
 
   //thread for first pipeline stage (input)
-  pthread_create(&threads_process, NULL, Fragment, &data_process_args);
+  //pthread_create(&threads_process, NULL, Fragment, &data_process_args);
+  Fragment(&data_process_args);
 
   //Create 3 thread pools for the intermediate pipeline stages
   struct thread_args anchor_thread_args[conf->nthreads];
@@ -1484,41 +1484,46 @@ void Encode(config_t * _conf) {
      anchor_thread_args[i].tid = i;
      pthread_create(&threads_anchor[i], NULL, FragmentRefine, &anchor_thread_args[i]);
   }
+  stats_t *threads_anchor_rv[conf->nthreads];
+  for (i = 0; i < conf->nthreads; i ++)
+    pthread_join(threads_anchor[i], (void **)&threads_anchor_rv[i]);
 
   struct thread_args chunk_thread_args[conf->nthreads];
   for (i = 0; i < conf->nthreads; i ++) {
     chunk_thread_args[i].tid = i;
     pthread_create(&threads_chunk[i], NULL, Deduplicate, &chunk_thread_args[i]);
   }
+  stats_t *threads_chunk_rv[conf->nthreads];
+  for (i = 0; i < conf->nthreads; i ++)
+    pthread_join(threads_chunk[i], (void **)&threads_chunk_rv[i]);
 
   struct thread_args compress_thread_args[conf->nthreads];
   for (i = 0; i < conf->nthreads; i ++) {
     compress_thread_args[i].tid = i;
     pthread_create(&threads_compress[i], NULL, Compress, &compress_thread_args[i]);
   }
-
+  stats_t *threads_compress_rv[conf->nthreads];
+  for (i = 0; i < conf->nthreads; i ++)
+    pthread_join(threads_compress[i], (void **)&threads_compress_rv[i]);
   //thread for last pipeline stage (output)
   struct thread_args send_block_args;
   send_block_args.tid = 0;
   send_block_args.nqueues = nqueues;
-  pthread_create(&threads_send, NULL, Reorder, &send_block_args);
+  //pthread_create(&threads_send, NULL, Reorder, &send_block_args);
+
+  Reorder(&send_block_args);
 
   /*** parallel phase ***/
 
   //Return values of threads
-  stats_t *threads_anchor_rv[conf->nthreads];
-  stats_t *threads_chunk_rv[conf->nthreads];
-  stats_t *threads_compress_rv[conf->nthreads];
 
-  //join all threads 
-  pthread_join(threads_process, NULL);
-  for (i = 0; i < conf->nthreads; i ++)
-    pthread_join(threads_anchor[i], (void **)&threads_anchor_rv[i]);
-  for (i = 0; i < conf->nthreads; i ++)
-    pthread_join(threads_chunk[i], (void **)&threads_chunk_rv[i]);
-  for (i = 0; i < conf->nthreads; i ++)
-    pthread_join(threads_compress[i], (void **)&threads_compress_rv[i]);
-  pthread_join(threads_send, NULL);
+
+
+
+  //join all threads
+  //pthread_join(threads_process, NULL);
+
+  //pthread_join(threads_send, NULL);
 
 #ifdef ENABLE_PARSEC_HOOKS
   __parsec_roi_end();
@@ -1586,7 +1591,7 @@ void Encode(config_t * _conf) {
 
 #ifdef ENABLE_STATISTICS
   /* dest file stat */
-  if (stat(conf->outfile, &filestat) < 0) 
+  if (stat(conf->outfile, &filestat) < 0)
       EXIT_TRACE("stat() %s failed: %s\n", conf->outfile, strerror(errno));
   stats.total_output = filestat.st_size;
 
@@ -1594,4 +1599,3 @@ void Encode(config_t * _conf) {
   if(conf->verbose) print_stats(&stats);
 #endif //ENABLE_STATISTICS
 }
-
