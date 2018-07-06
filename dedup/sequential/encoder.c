@@ -255,7 +255,7 @@ static int create_output_file(char *outfile) {
  * This function will block if the compressed data is not available yet.
  * This function might update the state of the chunk if there are any changes.
  */
-#ifdef ENABLE_PTHREADS
+/*#ifdef ENABLE_PTHREADS
 //NOTE: The parallel version checks the state of each chunk to make sure the
 //      relevant data is available. If it is not then the function waits.
 static void write_chunk_to_file(int fd, chunk_t *chunk) {
@@ -281,7 +281,7 @@ static void write_chunk_to_file(int fd, chunk_t *chunk) {
   }
   pthread_mutex_unlock(&chunk->header.lock);
 }
-#else
+#else*/
 //NOTE: The serial version relies on the fact that chunks are processed in-order,
 //      which means if it reaches the function it is guaranteed all data is ready.
 static void write_chunk_to_file(int fd, chunk_t *chunk) {
@@ -296,7 +296,7 @@ static void write_chunk_to_file(int fd, chunk_t *chunk) {
     write_file(fd, TYPE_FINGERPRINT, SHA1_LEN, (unsigned char *)(chunk->sha1));
   }
 }
-#endif //ENABLE_PTHREADS
+//#endif //ENABLE_PTHREADS
 
 int rf_win;
 int rf_win_dataprocess;
