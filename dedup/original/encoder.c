@@ -701,6 +701,7 @@ void *FragmentRefine(void * targs) {
         //End of buffer reached, don't split but simply enqueue it
         //Set correct state and sequence numbers
         chunk->sequence.l2num = chcount;
+        //printf("Chunk count: %d\n",chcount);
         chunk->isLastL2Chunk = TRUE;
         chcount++;
 
@@ -744,7 +745,7 @@ void *FragmentRefine(void * targs) {
 }
 #endif //ENABLE_PTHREADS
 
-/* 
+/*
  * Integrate all computationally intensive pipeline
  * stages to improve cache efficiency.
  */
@@ -1248,7 +1249,7 @@ void *Reorder(void * targs) {
       chunks_per_anchor[chunk->sequence.l1num] = chunk->sequence.l2num+1;
     }
 
-    //Put chunk into local cache if it's not next in the sequence 
+    //Put chunk into local cache if it's not next in the sequence
     if(!sequence_eq(chunk->sequence, next)) {
       pos = TreeFind(chunk->sequence.l1num, T);
       if (pos == NULL) {
@@ -1402,17 +1403,17 @@ void Encode(config_t * _conf) {
   assert(!mbuffer_system_init());
 
   /* src file stat */
-  if (stat(conf->infile, &filestat) < 0) 
+  if (stat(conf->infile, &filestat) < 0)
       EXIT_TRACE("stat() %s failed: %s\n", conf->infile, strerror(errno));
 
-  if (!S_ISREG(filestat.st_mode)) 
+  if (!S_ISREG(filestat.st_mode))
     EXIT_TRACE("not a normal file: %s\n", conf->infile);
 #ifdef ENABLE_STATISTICS
   stats.total_input = filestat.st_size;
 #endif //ENABLE_STATISTICS
 
   /* src file open */
-  if((fd = open(conf->infile, O_RDONLY | O_LARGEFILE)) < 0) 
+  if((fd = open(conf->infile, O_RDONLY | O_LARGEFILE)) < 0)
     EXIT_TRACE("%s file open error %s\n", conf->infile, strerror(errno));
 
   //Load entire file into memory if requested by user
@@ -1510,7 +1511,7 @@ void Encode(config_t * _conf) {
   stats_t *threads_chunk_rv[conf->nthreads];
   stats_t *threads_compress_rv[conf->nthreads];
 
-  //join all threads 
+  //join all threads
   pthread_join(threads_process, NULL);
   for (i = 0; i < conf->nthreads; i ++)
     pthread_join(threads_anchor[i], (void **)&threads_anchor_rv[i]);
@@ -1586,7 +1587,7 @@ void Encode(config_t * _conf) {
 
 #ifdef ENABLE_STATISTICS
   /* dest file stat */
-  if (stat(conf->outfile, &filestat) < 0) 
+  if (stat(conf->outfile, &filestat) < 0)
       EXIT_TRACE("stat() %s failed: %s\n", conf->outfile, strerror(errno));
   stats.total_output = filestat.st_size;
 
@@ -1594,4 +1595,3 @@ void Encode(config_t * _conf) {
   if(conf->verbose) print_stats(&stats);
 #endif //ENABLE_STATISTICS
 }
-

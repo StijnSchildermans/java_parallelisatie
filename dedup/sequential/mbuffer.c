@@ -136,15 +136,8 @@ mbuffer_t *mbuffer_clone(mbuffer_t *m) {
   if(temp==NULL) return NULL;
 
   //Update reference counter
-#ifdef ENABLE_PTHREADS
-  PTHREAD_LOCK(&locks[lock_hash(m->mcb)]);
   assert(m->mcb->i>=1);
   m->mcb->i++;
-  PTHREAD_UNLOCK(&locks[lock_hash(m->mcb)]);
-#else
-  assert(m->mcb->i>=1);
-  m->mcb->i++;
-#endif //ENABLE_PTHREADS
 
   //copy state, use joint mcb
   temp->ptr = m->ptr;
@@ -193,15 +186,8 @@ void mbuffer_free(mbuffer_t *m) {
 #endif
 
   //Update meta state first to avoid races
-#ifdef ENABLE_PTHREADS
-  PTHREAD_LOCK(&locks[lock_hash(m->mcb)]);
   m->mcb->i--;
   ref = m->mcb->i;
-  PTHREAD_UNLOCK(&locks[lock_hash(m->mcb)]);
-#else
-  m->mcb->i--;
-  ref = m->mcb->i;
-#endif //ENABLE_PTHREADS
 
   //NOTE: No need to synchronize access to ref counter value again because if it has hit 0 the buffer is dead
   if(ref==0) {
@@ -225,23 +211,12 @@ int mbuffer_realloc(mbuffer_t *m, size_t size) {
 #ifdef ENABLE_MBUFFER_CHECK
   assert(m->check_flag==MBUFFER_CHECK_MAGIC);
 #endif
-
-#ifdef ENABLE_PTHREADS
-  PTHREAD_LOCK(&locks[lock_hash(m->mcb)]);
-#endif //ENABLE_PTHREADS
-
   //We cannot resize a buffer if more than one pointer to it is in circulation
   if(m->mcb->i > 1) {
-#ifdef ENABLE_PTHREADS
-    PTHREAD_UNLOCK(&locks[lock_hash(m->mcb)]);
-#endif
     return -1;
   }
   //This must be the original mbuffer, otherwise we'd have to do something more complicated
   if(m->ptr != m->mcb->ptr) {
-#ifdef ENABLE_PTHREADS
-    PTHREAD_UNLOCK(&locks[lock_hash(m->mcb)]);
-#endif
     return -1;
   }
 
@@ -251,11 +226,6 @@ int mbuffer_realloc(mbuffer_t *m, size_t size) {
     m->n = size;
     m->mcb->ptr = r;
   }
-
-#ifdef ENABLE_PTHREADS
-  PTHREAD_UNLOCK(&locks[lock_hash(m->mcb)]);
-#endif
-
   if(r == NULL) {
     return -1;
   } else {
@@ -276,15 +246,8 @@ int mbuffer_split(mbuffer_t *m1, mbuffer_t *m2, size_t split) {
 #endif
 
   //Update reference counter
-#ifdef ENABLE_PTHREADS
-  PTHREAD_LOCK(&locks[lock_hash(m1->mcb)]);
   assert(m1->mcb->i>=1);
   m1->mcb->i++;
-  PTHREAD_UNLOCK(&locks[lock_hash(m1->mcb)]);
-#else
-  assert(m1->mcb->i>=1);
-  m1->mcb->i++;
-#endif //ENABLE_PTHREADS
 
   //split buffer
   m2->ptr = m1->ptr+split;

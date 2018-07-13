@@ -67,7 +67,7 @@ typedef int64_t  int64;
 #define O_LARGEFILE  0100000
 #endif
 
-#define EXT       ".ddp"           /* extension */ 
+#define EXT       ".ddp"           /* extension */
 #define EXT_LEN   (sizeof(EXT)-1)  /* extention length */
 
 
@@ -216,4 +216,3 @@ typedef struct {
 #define UNCOMPRESS_BOUND 10000000
 
 #endif //_DEDUPDEF_H_
-

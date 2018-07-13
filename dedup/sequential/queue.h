@@ -108,4 +108,3 @@ int queue_dequeue(queue_t *que, ringbuffer_t *buf, int limit);
 int queue_enqueue(queue_t *que, ringbuffer_t *buf, int limit);
 
 #endif //_QUEUE_H_
-

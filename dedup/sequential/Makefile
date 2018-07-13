@@ -6,7 +6,7 @@ CFLAGS += -Wall -fno-strict-aliasing -D_XOPEN_SOURCE=600 -pthread
 
 LIBS += -lm
 
-DEDUP_OBJ = hashtable.o util.o dedup.o rabin.o encoder.o decoder.o mbuffer.o sha.o
+DEDUP_OBJ = iterator.o chunk_list.o hashtable.o util.o dedup.o rabin.o encoder.o decoder.o mbuffer.o sha.o
 DEDUP_OBJ += queue.o binheap.o tree.o
 
 # Uncomment the following to enable gzip compression
