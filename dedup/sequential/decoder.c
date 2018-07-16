@@ -185,7 +185,7 @@ void Decode(config_t * _conf) {
     exit(1);
   }
 
-  mbuffer_system_init();
+  //mbuffer_system_init();
 
   //Open input & output files
   fd_in = open(conf->infile, O_RDONLY|O_LARGEFILE);
@@ -257,9 +257,8 @@ void Decode(config_t * _conf) {
   close(fd_out);
 
   free(chunk);
-  mbuffer_system_destroy();
+  //mbuffer_system_destroy();
   //NOTE: Would have to iterate through hashtable and manually free all buffers. Calling
   //      hashtable_destroy will cause those buffers to be reported as leaked memory.
   //hashtable_destroy(cache, TRUE);
 }
-

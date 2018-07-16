@@ -1027,8 +1027,6 @@ void Encode(config_t * _conf) {
   if (conf->infile != NULL)
     close(fd);
 
-  assert(!mbuffer_system_destroy());
-
   free(refined);
 
   free(refined_merged);

@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
 #ifdef PARSEC_VERSION
 #define __PARSEC_STRING(x) #x
 #define __PARSEC_XSTRING(x) __PARSEC_STRING(x)
-  printf("PARSEC Benchmark Suite Version "__PARSEC_XSTRING(PARSEC_VERSION)"\n");
+  //printf("PARSEC Benchmark Suite Version "__PARSEC_XSTRING(PARSEC_VERSION)"\n");
 #else
-  printf("PARSEC Benchmark Suite\n");
+  //printf("PARSEC Benchmark Suite\n");
 #endif //PARSEC_VERSION
 #ifdef ENABLE_PARSEC_HOOKS
         __parsec_bench_begin(__parsec_dedup);
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
     case 'w':
       if (strcmp(optarg, "gzip") == 0)
         conf->compress_type = COMPRESS_GZIP;
-      else if (strcmp(optarg, "bzip2") == 0) 
+      else if (strcmp(optarg, "bzip2") == 0)
         conf->compress_type = COMPRESS_BZIP2;
       else if (strcmp(optarg, "none") == 0)
         conf->compress_type = COMPRESS_NONE;
@@ -171,4 +171,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-

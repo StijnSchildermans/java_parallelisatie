@@ -151,20 +151,22 @@ List * merge(List * l1, List * l2){
 //Zips n lists that were split using split_mod.
 List * zip(int n, List ** lists){
   List * output = emptylist();
-  Iterator ** iters = malloc(n * sizeof(Iterator *));
+  Node ** buffers = malloc(n*sizeof(Node *));
   int i;
-  for (i = 0; i < n; i++) iters[i] = init_iterator(lists[i]);
+  for(i=0;i<n;i++)buffers[i] = lists[i]->head;
+  int len = length(lists[0]);
 
-  while(hasNext(iters[0])){
-    for(i = 0; i < n; i++) {
-      if(hasNext(iters[i])) add(next(iters[i]), output);
+  for (i = 0; i<len;i++){
+    for (int j = 0; j<n;j++){
+      if(buffers[j]!= NULL){
+        add_node(buffers[j],output);
+        buffers[j] = buffers[j]->next;
+      }
     }
   }
-  for(i=0;i<n;i++){
-    destroy_iterator(iters[i]);
-    destroy_soft(lists[i]);
-  }
-  free(iters);
+  for(i=0;i<n;i++) free(lists[i]);
+  //free(lists);
+  free(buffers);
   return output;
 }
 void check_sequence(List * list){

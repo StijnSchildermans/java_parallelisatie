@@ -56,14 +56,14 @@ static inline int lock_hash(void *p) {
 
 
 
-//Initialize memory buffer subsystem
+/*//Initialize memory buffer subsystem
 int mbuffer_system_init() {
 #ifdef ENABLE_PTHREADS
   int i;
 
   assert(locks==NULL);
-  locks = malloc(NUMBER_OF_LOCKS * sizeof(pthread_lock_t));
-  if(locks==NULL) return -1;
+  //locks = malloc(NUMBER_OF_LOCKS * sizeof(pthread_lock_t));
+  //if(locks==NULL) return -1;
   for(i=0; i<NUMBER_OF_LOCKS; i++) {
     if(PTHREAD_LOCK_INIT(&locks[i]) != 0) {
       int j;
@@ -78,9 +78,9 @@ int mbuffer_system_init() {
 #endif
   return 0;
 }
-
+*/
 //Shutdown memory buffer subsystem
-int mbuffer_system_destroy() {
+/*int mbuffer_system_destroy() {
 #ifdef ENABLE_PTHREADS
   int i, rv;
   rv=0;
@@ -93,7 +93,7 @@ int mbuffer_system_destroy() {
 #else
   return 0;
 #endif
-}
+}*/
 
 //Initialize a memory buffer
 int mbuffer_create(mbuffer_t *m, size_t size) {
