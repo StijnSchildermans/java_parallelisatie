@@ -316,7 +316,8 @@ void sub_Compress(chunk_t *chunk) {
         }*/
         //compress the block
         n = chunk->compressed_data.n;
-        r = compress(chunk->compressed_data.ptr, &n, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
+        r = Z_OK;//compress(chunk->compressed_data.ptr, &n, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
+        memcpy(chunk->compressed_data.ptr, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
         if (r != Z_OK) {
           EXIT_TRACE("Compression failed\n");
         }
