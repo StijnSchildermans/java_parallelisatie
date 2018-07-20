@@ -337,10 +337,11 @@ void sub_Compress(chunk_t *chunk) {
           EXIT_TRACE("Creation of compression buffer failed.\n");
         }
         //compress the block
-        r = compress(chunk->compressed_data.ptr, &n, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
+        r = Z_OK;//compress(chunk->compressed_data.ptr, &n, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
         if (r != Z_OK) {
           EXIT_TRACE("Compression failed\n");
         }
+        memcpy(chunk->compressed_data.ptr, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
         //Shrink buffer to actual size
         if(n < chunk->compressed_data.n) {
           r = mbuffer_realloc(&chunk->compressed_data, n);
