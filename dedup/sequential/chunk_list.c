@@ -4,49 +4,130 @@
 #include "iterator.h"
 
 
-Node * createnode(chunk_t * data){
+/*Node * createnode(chunk_t * data){
   Node * newNode = malloc(sizeof(Node));
   newNode->data = data;
   newNode->next = NULL;
   return newNode;
+}*/
+
+void createNNodes(int n, List * list){
+  //printf("Added nodes\n");
+  //printf("In createNodes\n");
+  //if(list->length < 64) n = 64;
+  //else if (list->length < 2048) n = list->length;
+  //else n = 2048;
+  //printf("N = %d\n",n);
+  Node * newNodes = malloc(n * sizeof(Node));
+  for (int i = 0; i < n-1; i++){
+    newNodes[i].data = NULL;
+    newNodes[i].next = &newNodes[i+1];
+  }
+  newNodes[n-1].next = NULL;
+  //No non-empty elemnts
+  if(list->tail == NULL) {
+    //No empty elements either
+    if (list->head == NULL) list->head = newNodes;
+    //Only empty elements
+    else {
+      Node * h = list->head;
+      while(h->next != NULL) h = h->next;
+      h->next = newNodes;
+    }
+  }
+  else list->tail->next = newNodes;
+  //printf("Uit createNodes\n");
+  //list->empty = newNodes;
+}
+
+void createNodes(List * list){
+  createNNodes(2048,list);
 }
 
 List * emptylist(){
   List * list = malloc(sizeof(List));
   list->head = NULL;
   list->tail = NULL;
+  list->length = 0;
+  //createNodes(list);
+  return list;
+}
+List * nonemptylist(int n){
+  List * list = emptylist();
+  createNNodes(n,list);
   return list;
 }
 
 void add(chunk_t * elem, List * list){
-  if(list->head == NULL){
-    list->head = createnode(elem);
+  //printf("In add\n");
+  if (list->head == NULL) createNodes(list);
+  if (list->head->data == NULL || list->tail == NULL){
+    list->head->data = elem;
     list->tail = list->head;
   }
   else{
-    Node * last = list->tail;
-    Node * new = createnode(elem);
-    last->next = new;
-    list->tail = new;
+    if(list->tail->next == NULL) createNodes(list);
+    list->tail = list->tail->next;
+    list->tail->data = elem;
   }
+  list->length++;
+  //printf("Uit add\n");
 }
 void add_node(Node * node, List * list){
-  if (list->head == NULL) list->head = node;
-  else list->tail->next = node;
-  list->tail = node;
+  //Empty list
+  if(list->head == NULL) {
+    //createNodes(list);
+    //node->next = list->head->next;
+    node->next = NULL;
+    list->head = node;
+    list->tail = node;
+
+  }
+  //List with only empty nodes
+  else if (list->head->data == NULL){
+    node->next = list->head;
+    list->head = node;
+    list->tail = node;
+  }
+  else{
+    node->next = list->tail->next;
+    list->tail->next = node;
+    list->tail = node;
+  }
+  list->length++;
 }
 void add_nodes(Node * head, Node * tail, List * list){
-  if (list->head == NULL) list->head = head;
-  else list->tail->next = head;
-  list->tail = tail;
+  int len = 1;
+  Node * n = head;
+  while (n != tail){
+    n = n->next;
+    len++;
+  }
+  //List is empty
+  if (list->head == NULL) {
+    list->head = head;
+    list->tail = tail;
+  }
+  //List only has empty nodes
+  else if (list->head->data == NULL){
+    tail->next = list->head;
+    list->head = head;
+    list->tail = tail;
+  }
+  else{
+    tail->next = list->tail->next;
+    list->tail->next = head;
+    list->tail = tail;
+  }
+  list->length += len;
 }
-int length(List * list){
+/*int length(List * list){
   int i = 1;
   Iterator * iter = init_iterator(list);
   while(next_node(iter)!=list->tail) i++;
   destroy_iterator(iter);
   return i;
-}
+}*/
 
 chunk_t * get(int index, List * list){
   int i = 0;
@@ -72,8 +153,21 @@ void destroy(List * list){
   }
   free(list);
 }
-void destroy_soft(List * list){
+/*void destroy_soft(List * list){
   Node * current = list->head;
+  Node * next = current;
+  printf("Lengte lijst:%d\n",list->length);
+  while(current != NULL){
+    next = current->next;
+    free(current);
+    printf("Node vrijgegeven\n");
+    current = next;
+  }
+  free(list);
+}*/
+/*void destroy_empty(List * list){
+  if (list->tail == NULL) return;
+  Node * current = list->tail->next;
   Node * next = current;
   while(current != NULL){
     next = current->next;
@@ -81,24 +175,33 @@ void destroy_soft(List * list){
     current = next;
   }
   free(list);
-}
+}*/
 //Splits a list in n sublists of sequential elements.
 List ** split(int n, List * list){
-  int size = length(list)/n;
+  //printf("In split\n");
+  int size = (list->length)/n;
   List ** lists = malloc(n * sizeof(List*));
   for (int q = 0; q<n;q++) lists[q] = emptylist();
+  Node * buffer;
+  buffer = list->head;
 
-  int i = 0;
-  Iterator * iter = init_iterator(list);
-  while(hasNext(iter)){
+  for(int i = 0; i< list->length; i++){
     int l;
     if(i/size < n) l = (i/size);
     else l = (n-1);
-    add(next(iter),lists[l]);
-    i++;
+    Node * nn = buffer->next;
+    add_node(buffer,lists[l]);
+    buffer = nn;
   }
-  destroy_soft(list);
-  destroy_iterator(iter);
+  //Iterator * iter = init_iterator(list);
+  //while(hasNext(iter)){
+    //add(next(iter),lists[l]);
+    //i++;
+  //}//
+  //destroy_soft(list);
+  //destroy_iterator(iter);
+  //destroy_empty(list);
+  //printf("Uit split\n");
   return lists;
 }
 void compare(List * l1, List* l2){
@@ -119,18 +222,69 @@ List ** split_mod(int n, List * list){
   List ** lists = malloc(n * sizeof(List*));
   for (int q = 0; q<n;q++) lists[q] = emptylist();
   int i = 0;
-  Iterator * iter = init_iterator(list);
-  while(hasNext(iter)){
-    Node * nn = next_node(iter);
-    add_node(nn,lists[i]);
+  Node * buffer = list->head;
+
+  int len = list->length;
+  for(int j = 0; j < len; j++){
+    //if(buffer == NULL)printf("Buffer = NULL, len = %d, j = %d\n",len,j);
+    Node * nn = buffer->next;
+    add_node(buffer,lists[i]);
+    buffer = nn/*->next*/;
+
     if(i == (n - 1)) i = 0;
     else i++;
   }
-  for (int q = 0; q < n; q++) lists[q]->tail->next = NULL;
-  free(list);
-  destroy_iterator(iter);
+  //for (int q = 0; q < n; q++) lists[q]->tail->next = NULL;
+  //destroy_empty(list);
   return lists;
 }
+void check_empty(List * list){
+  Node * n = list->tail->next;
+  while (n!= NULL){
+    if (n->data != NULL) printf("Data is niet NULL, l1num = %d\n",n->data->sequence.l1num);
+    n = n->next;
+  }
+}
+//Adds the empty nodes of l2 to the end of l1
+void merge_empty(List * l1, List * l2){
+  Node * fempty = NULL;
+  Node * lempty = NULL;
+
+  //Initialize fempty;
+  if (l1 == NULL) l1 = emptylist();
+  //Only empty elements in l1
+  else if(l1->head != NULL && l1->tail == NULL) fempty = l1->head;
+  //No empty elements in l1
+  if (l1->head == NULL || l1->tail->next == NULL){
+    if (l2 == NULL || l2->head == NULL) return;
+    else if(l2->tail == NULL) fempty = l2->head;
+    else if(l2->tail->next == NULL) return;
+    else fempty = l2->tail->next;
+  }
+  //All other cases
+  else fempty = l1->tail->next;
+
+  //Initialize lempty
+  lempty = fempty;
+  while(lempty->next != NULL) lempty = lempty->next;
+
+  //merge lempty and first empty element of l2 if necessary
+  if(l2 != NULL && l2->tail != NULL && l2->tail->next != NULL && fempty != l2->tail->next){
+    lempty->next = l2->tail->next;
+  }
+  else if(l2->head != NULL && l2->tail == NULL && fempty != l2->head) lempty->next = l2->head;
+
+  //Do what is necessary to return l1 with the merged empty sections;
+  if(l1->head == NULL || l1->tail == NULL) l1->head = fempty;
+  else l1->tail->next = fempty;
+
+  //Remove empty nodes from l2 if necessary
+  if (l2 != NULL && l2->tail != NULL) l2->tail->next = NULL;
+  else if (l2 != NULL && l2->head != NULL && l2->tail == NULL) l2->head = NULL;
+  //check_empty(l1);
+}
+
+
 
 List * merge(List * l1, List * l2){
   if (l1 == NULL) return l2;
@@ -143,30 +297,45 @@ List * merge(List * l1, List * l2){
     free(l2);
     return l1;
   }
+  merge_empty(l1,l2);
+  l2->tail->next = l1->tail->next;
   l1->tail->next = l2->head;
   l1->tail = l2->tail;
+  l1->length += l2->length;
+  //free(l2);
+  //Node * n = l1->head;
+  /*for (int i = 1; i <= l1->length; i++){
+    if(n == NULL) printf("Node %d is NULL\n",i);
+    n = n->next;
+  }*/
   free(l2);
   return l1;
 }
 //Zips n lists that were split using split_mod.
 List * zip(int n, List ** lists){
   List * output = emptylist();
+  //printf("Voor merge_empty\n");
+  for(int q = 0; q<n; q++) merge_empty(output,lists[q]);
+  //printf("Na merge_empty\n");
   Node ** buffers = malloc(n*sizeof(Node *));
   int i;
   for(i=0;i<n;i++)buffers[i] = lists[i]->head;
-  int len = length(lists[0]);
+  int len = lists[0]->length;
 
   for (i = 0; i<len;i++){
     for (int j = 0; j<n;j++){
       if(buffers[j]!= NULL){
-        add_node(buffers[j],output);
-        buffers[j] = buffers[j]->next;
+        Node * nnn = buffers[j];
+        buffers[j] = nnn->next;
+        add_node(nnn,output);
+        //buffers[j] = buffers[j]->next;
       }
     }
   }
   for(i=0;i<n;i++) free(lists[i]);
-  //free(lists);
+  free(lists);
   free(buffers);
+  //check_sequence(output);
   return output;
 }
 void check_sequence(List * list){
@@ -177,8 +346,8 @@ void check_sequence(List * list){
 
   while(hasNext(iter)){
     chunk_t* c = next(iter);
-    if (c->sequence.l1num < l1num || (c->sequence.l2num < l2num && c->sequence.l1num == l1num) || c->sequence.l2num == l2num){
-      printf("Error in sequence: old l1num = %d, old l2num = %d, neuw l1num = %d, neuw l2num = %d\n",l1num, l2num, c->sequence.l1num,c->sequence.l2num);
+    if (c->sequence.l1num < l1num || (c->sequence.l2num < l2num && c->sequence.l1num == l1num) /*|| c->sequence.l2num == l2num*/){
+      printf("Error in sequence: old l1num = %d, old l2num = %d, new l1num = %d, new l2num = %d\n",l1num, l2num, c->sequence.l1num,c->sequence.l2num);
     }
     l1num = c->sequence.l1num;
     l2num = c->sequence.l2num;
@@ -193,6 +362,10 @@ void check_sequence(List * list){
 * Cleans up the input lists
 */
 List * sorted_merge(List * l1, List * l2){
+  //check_sequence(l1);
+  //check_sequence(l2);
+  //printf("L1 en l2 ok\n");
+    //printf("In sorted merge\n");
       //If one of the lists is empty, simply return the other list
       //Clean up the empty list
       if(l1 == NULL) return l2;
@@ -207,49 +380,71 @@ List * sorted_merge(List * l1, List * l2){
       }
       //Create output list and temporary variables
       List * output = emptylist();
-      Iterator * iter1 = init_iterator(l1);
-      Iterator * iter2 = init_iterator(l2);
-      Node * node1 = next_node(iter1);
-      Node * node2 = next_node(iter2);
+      //printf("Voor merge_empty\n");
+      merge_empty(output,l1);
+      //printf("Merged l1\n");
+      merge_empty(output,l2);
+      //printf("Na merge_empty\n");
+      //Iterator * iter1 = init_iterator(l1);
+      //Iterator * iter2 = init_iterator(l2);
+      Node * node1 = l1->head;//next_node(iter1);
+      Node * node2 = l2->head;//next_node(iter2);
       chunk_t * chunk1 = node1->data;
       chunk_t * chunk2 = node2->data;
+      Node * buf1 = node1->next;
+      Node * buf2 = node2->next;
 
       //While both lists are not empty, 'zip' the lists by comparing elements
       int cont = 1;
       while(cont){
         if (output->tail == node1){
-          node1 = next_node(iter1);
+          //printf("Output->tail == node1\n");
+          node1 = buf1;
+          buf1 = buf1->next;//next_node(iter1);
           chunk1 = node1->data;
         }
         else if (output->tail == node2){
-          node2 = next_node(iter2);
+          //printf("Output->tail == node2\n");
+          node2 = buf2;
+          buf2 = buf2->next; //next_node(iter2);
           chunk2 = node2->data;
         }
+        //printf("Chunk 1: %p, chunk2: %p\n",chunk1,chunk2);
         //Instead of moving chunks, we move entire nodes for efficiency.
         if(chunk1->sequence.l1num < chunk2->sequence.l1num
           || (chunk1->sequence.l1num == chunk2->sequence.l1num
           && chunk1->sequence.l2num < chunk2->sequence.l2num)) {
+            //printf("Adding node1\n");
             add_node(node1,output);
-            if(!hasNext(iter1)){
+            if(buf1 == NULL || buf1->data == NULL){
               cont = 0;
               add_node(node2,output);
             }
           }
         else {
+          //printf("Adding node2\n");
           add_node(node2,output);
-          if(!hasNext(iter2)){
+          //printf("Added node2\n");
+          //printf("Buf2: %p\n",buf2);
+          if(buf2 == NULL || buf2->data == NULL){
+            //printf("Buf2 == NULL\n");
             cont = 0;
             add_node(node1,output);
           }
         }
+        //printf("Added node\n");
       }
+      //printf("Voorbij loop\n");
       //Add the entire remainder of the non-empty list at once.
-      if (hasNext(iter1)) add_nodes(next_node(iter1), l1->tail, output);
-      else if (hasNext(iter2)) add_nodes(next_node(iter2), l2->tail, output);
+      if (buf1 != NULL && buf1->data != NULL) add_nodes(buf1, l1->tail, output);
+      else if (buf2 != NULL && buf2->data != NULL) add_nodes(buf2, l2->tail, output);
 
-      destroy_iterator(iter2);
-      destroy_iterator(iter1);
+      //destroy_iterator(iter2);
+      //destroy_iterator(iter1);
       free(l1);
       free(l2);
+      //printf("Uit sorted merge\n");
+      //check_sequence(output);
+      //printf("Output sorted_merge ok\n");
       return output;
   }

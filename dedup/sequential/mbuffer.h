@@ -65,6 +65,8 @@ int mbuffer_system_destroy();
 //The mbuffer system will not attempt to free argument *m
 int mbuffer_create(mbuffer_t *m, size_t size);
 
+int mbuffer_create_existing(mbuffer_t *m, size_t size);
+
 //Make a shallow copy of a memory buffer
 mbuffer_t *mbuffer_clone(mbuffer_t *m);
 
@@ -83,4 +85,3 @@ int mbuffer_realloc(mbuffer_t *m, size_t size);
 int mbuffer_split(mbuffer_t *m1, mbuffer_t *m2, size_t split);
 
 #endif //_MBUFFER_H_
-

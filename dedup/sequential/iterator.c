@@ -8,23 +8,27 @@ Iterator * init_iterator(List * list){
 }
 
 Node * next_node(Iterator * iter){
+  //printf("In next_node\n");
   Node * n = iter->index;
   if (n == NULL) {
     n = iter->list->head;
-    if (n==NULL) return NULL;
+    if (n == NULL || n->data==NULL) return NULL;
     else{
       iter->index = n;
       return n;
     }
   }
   Node * nn = n->next;
-  if(nn==NULL) return NULL;
+  if(nn == NULL || nn->data==NULL) return NULL;
   iter->index = nn;
+  //printf("Uit next_node\n");
   return nn;
 }
 chunk_t * next(Iterator * iter){
+  //printf("Voor next_node\n");
   Node * n = next_node(iter);
-  if (n == NULL) return NULL;
+  //printf("Next_node = %p\n",n);
+  if (n == NULL || n->data == NULL) return NULL;
   return n->data;
 };
 void reset(Iterator * iter){

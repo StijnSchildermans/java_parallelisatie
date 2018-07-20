@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 #ifdef ENABLE_PTHREADS
 #include <pthread.h>
@@ -178,6 +179,7 @@ mbuffer_t *mbuffer_copy(mbuffer_t *m) {
 
 //Free a memory buffer
 void mbuffer_free(mbuffer_t *m) {
+  //printf("In mbuffer_free\n");
   unsigned int ref;
 
   assert(m!=NULL);
@@ -186,6 +188,7 @@ void mbuffer_free(mbuffer_t *m) {
 #endif
 
   //Update meta state first to avoid races
+  //if (m == NULL || m->mcb == NULL) printf("MCB = NULL\n");
   m->mcb->i--;
   ref = m->mcb->i;
 
@@ -193,8 +196,8 @@ void mbuffer_free(mbuffer_t *m) {
   if(ref==0) {
     free(m->mcb->ptr);
     m->mcb->ptr=NULL;
-    free(m->mcb);
-    m->mcb=NULL;
+    //free(m->mcb);
+    //m->mcb=NULL;
   }
 #ifdef ENABLE_MBUFFER_CHECK
     m->check_flag=0;
