@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
   }
 
   strcpy(conf->outfile, "");
-  conf->compress_type = COMPRESS_GZIP;
+  conf->compress_type = COMPRESS_NONE;
   conf->preloading = 0;
   conf->nthreads = 1;
   conf->verbose = 0;
