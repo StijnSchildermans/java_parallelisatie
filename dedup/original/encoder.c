@@ -219,6 +219,8 @@ static int write_file(int fd, u_char type, u_long len, u_char * content) {
   if (xwrite(fd, content, len) < 0){
     EXIT_TRACE("xwrite content fails\n");
   }
+  //printf("Size of type: %d, size of len: %d\n",sizeof(type),sizeof(len));
+  //fflush(stdout);
   return 0;
 }
 
@@ -312,6 +314,7 @@ void sub_Compress(chunk_t *chunk) {
     int r;
 
     assert(chunk!=NULL);
+
     //compress the item and add it to the database
 #ifdef ENABLE_PTHREADS
     pthread_mutex_lock(&chunk->header.lock);
@@ -330,6 +333,7 @@ void sub_Compress(chunk_t *chunk) {
         break;
 #ifdef ENABLE_GZIP_COMPRESSION
       case COMPRESS_GZIP:
+        //printf("Compressing using GZIP\n");
         //Gzip compression buffer must be at least 0.1% larger than source buffer plus 12 bytes
         n = chunk->uncompressed_data.n + (chunk->uncompressed_data.n >> 9) + 12;
         r = mbuffer_create(&chunk->compressed_data, n);
@@ -337,11 +341,11 @@ void sub_Compress(chunk_t *chunk) {
           EXIT_TRACE("Creation of compression buffer failed.\n");
         }
         //compress the block
-        r = Z_OK;//compress(chunk->compressed_data.ptr, &n, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
+        r = compress(chunk->compressed_data.ptr, &n, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
         if (r != Z_OK) {
           EXIT_TRACE("Compression failed\n");
         }
-        memcpy(chunk->compressed_data.ptr, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
+        //memcpy(chunk->compressed_data.ptr, chunk->uncompressed_data.ptr, chunk->uncompressed_data.n);
         //Shrink buffer to actual size
         if(n < chunk->compressed_data.n) {
           r = mbuffer_realloc(&chunk->compressed_data, n);

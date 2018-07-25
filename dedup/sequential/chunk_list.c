@@ -12,12 +12,6 @@
 }*/
 
 void createNNodes(int n, List * list){
-  //printf("Added nodes\n");
-  //printf("In createNodes\n");
-  //if(list->length < 64) n = 64;
-  //else if (list->length < 2048) n = list->length;
-  //else n = 2048;
-  //printf("N = %d\n",n);
   Node * newNodes = malloc(n * sizeof(Node));
   for (int i = 0; i < n-1; i++){
     newNodes[i].data = NULL;
@@ -41,7 +35,14 @@ void createNNodes(int n, List * list){
 }
 
 void createNodes(List * list){
-  createNNodes(2048,list);
+  int n;
+  //printf("Added nodes\n");
+  //printf("In createNodes\n");
+  if (list->length < 16) n = 16;
+  else if (list->length < 1024) n = list->length;
+  else n = 1024;
+  //printf("N = %d\n",n);
+  createNNodes(n,list);
 }
 
 List * emptylist(){
@@ -256,23 +257,33 @@ void merge_empty(List * l1, List * l2){
   else if(l1->head != NULL && l1->tail == NULL) fempty = l1->head;
   //No empty elements in l1
   if (l1->head == NULL || l1->tail->next == NULL){
+    //printf("l1->head == NULL\n");
     if (l2 == NULL || l2->head == NULL) return;
     else if(l2->tail == NULL) fempty = l2->head;
     else if(l2->tail->next == NULL) return;
-    else fempty = l2->tail->next;
+    else {
+       fempty = l2->tail->next;
+       //printf("fempty = l2->tail->next\n");
+     }
   }
   //All other cases
   else fempty = l1->tail->next;
 
+  //printf("Initialized fempty: %p\n",fempty);
+
   //Initialize lempty
   lempty = fempty;
   while(lempty->next != NULL) lempty = lempty->next;
+
+  //printf("Initialized lempty\n");
 
   //merge lempty and first empty element of l2 if necessary
   if(l2 != NULL && l2->tail != NULL && l2->tail->next != NULL && fempty != l2->tail->next){
     lempty->next = l2->tail->next;
   }
   else if(l2->head != NULL && l2->tail == NULL && fempty != l2->head) lempty->next = l2->head;
+
+  //printf("Merged empty parts of l1 and l2\n");
 
   //Do what is necessary to return l1 with the merged empty sections;
   if(l1->head == NULL || l1->tail == NULL) l1->head = fempty;
@@ -284,7 +295,44 @@ void merge_empty(List * l1, List * l2){
   //check_empty(l1);
 }
 
+void check_sequence(List * list){
+  Iterator * iter = init_iterator(list);
 
+  int l1num = 0;
+  int l2num = 0;
+
+  while(hasNext(iter)){
+    chunk_t* c = next(iter);
+    if (c->sequence.l1num < l1num || (c->sequence.l2num < l2num && c->sequence.l1num == l1num) /*|| c->sequence.l2num == l2num*/){
+      printf("Error in sequence: old l1num = %d, old l2num = %d, new l1num = %d, new l2num = %d\n",l1num, l2num, c->sequence.l1num,c->sequence.l2num);
+    }
+    l1num = c->sequence.l1num;
+    l2num = c->sequence.l2num;
+  }
+
+  destroy_iterator(iter);
+}
+
+void check_sequence_exact(List * list){
+  Iterator * iter = init_iterator(list);
+
+  chunk_t * c = next(iter);
+  int l1num = c->sequence.l1num;
+  int l2num = c->sequence.l2num;
+
+
+  while(hasNext(iter)){
+    c = next(iter);
+    if (!((c->sequence.l1num == l1num && c->sequence.l2num == l2num+1)
+       || (c->sequence.l1num == l1num+1 && c->sequence.l2num == 0))){
+      printf("Error in sequence: old l1num = %d, old l2num = %d, new l1num = %d, new l2num = %d\n",l1num, l2num, c->sequence.l1num,c->sequence.l2num);
+    }
+    l1num = c->sequence.l1num;
+    l2num = c->sequence.l2num;
+  }
+
+  destroy_iterator(iter);
+}
 
 List * merge(List * l1, List * l2){
   if (l1 == NULL) return l2;
@@ -338,23 +386,59 @@ List * zip(int n, List ** lists){
   //check_sequence(output);
   return output;
 }
-void check_sequence(List * list){
-  Iterator * iter = init_iterator(list);
 
-  int l1num = 0;
-  int l2num = 0;
-
-  while(hasNext(iter)){
-    chunk_t* c = next(iter);
-    if (c->sequence.l1num < l1num || (c->sequence.l2num < l2num && c->sequence.l1num == l1num) /*|| c->sequence.l2num == l2num*/){
-      printf("Error in sequence: old l1num = %d, old l2num = %d, new l1num = %d, new l2num = %d\n",l1num, l2num, c->sequence.l1num,c->sequence.l2num);
-    }
-    l1num = c->sequence.l1num;
-    l2num = c->sequence.l2num;
+List ** zip_split(int n, List ** lists){
+  List ** output = malloc(n*sizeof(List *));
+  for (int i = 0; i < n; i++){
+    output[i] = emptylist();
+    //printf("Voor merge_empty\n");
+    merge_empty(output[i],lists[i]);
+    //printf("Na merge_empty\n");
   }
+  Node ** buffers = malloc(n*sizeof(Node *));
+  int i;
+  for(i=0;i<n;i++)buffers[i] = lists[i]->head;
+  int len = lists[0]->length;
+  int out_list = 0;
+  int count = 0;
 
-  destroy_iterator(iter);
+  //printf("Voor loops\n");
+
+  for (i = 0; i<len;i++){
+    for (int j = 0; j<n;j++){
+      if(buffers[j]!= NULL){
+        Node * nnn = buffers[j];
+        buffers[j] = nnn->next;
+        if(count == len){
+          out_list++;
+          count = 0;
+        }
+        add_node(nnn,output[out_list]);
+        count++;
+        //buffers[j] = buffers[j]->next;
+      }
+    }
+  }
+  //for (i = 0; i<n;i++)check_sequence_exact(output[i]);
+  /*len = 0;
+  for (i = 0; i<n;i++){
+    Node * n = output[i]->head;
+    len++;
+    while(n->next != NULL && n->next->data != NULL){
+      n = n->next;
+      len++;
+    }
+  }
+  printf("Totaal aantal chunks na zip_split: %d\n",len);*/
+  //printf("Na loops\n");
+  for(i=0;i<n;i++) free(lists[i]);
+  free(lists);
+  free(buffers);
+  //check_sequence(output);
+  return output;
 }
+
+
 
 /*
 * Takes 2 lists of chunks that are sorted by l1num and l2number

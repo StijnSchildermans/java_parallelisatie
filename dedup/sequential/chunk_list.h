@@ -35,5 +35,6 @@ List * merge(List * l1, List * l2);
 void destroy_soft(List * list);
 List * sorted_merge(List * l1, List * l2);
 void check_sequence(List * list);
+List ** zip_split(int n, List ** lists);
 
 #endif

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
+
 
 #ifdef ENABLE_PTHREADS
 #include <pthread.h>
@@ -104,7 +106,10 @@ int mbuffer_create(mbuffer_t *m, size_t size) {
 
   //FIXME: Merge both mallocs to one
   ptr = malloc(size);
-  if(ptr==NULL) return -1;
+  if(ptr==NULL){
+    printf("Could not allocate memory. Size = %d\n",size);
+    return -1;
+  }
   m->mcb = (mcb_t *)malloc(sizeof(mcb_t));
   if(m->mcb==NULL) {
     free(ptr);

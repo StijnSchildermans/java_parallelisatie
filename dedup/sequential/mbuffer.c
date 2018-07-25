@@ -192,16 +192,20 @@ void mbuffer_free(mbuffer_t *m) {
   m->mcb->i--;
   ref = m->mcb->i;
 
+  //if(m->mcb == NULL) printf("MCB = NULL\n");
+
   //NOTE: No need to synchronize access to ref counter value again because if it has hit 0 the buffer is dead
   if(ref==0) {
+    //assert(m->mcb != NULL);
     free(m->mcb->ptr);
     m->mcb->ptr=NULL;
-    //free(m->mcb);
-    //m->mcb=NULL;
+    free(m->mcb);
+    m->mcb=NULL;
   }
-#ifdef ENABLE_MBUFFER_CHECK
-    m->check_flag=0;
-#endif
+  #ifdef ENABLE_MBUFFER_CHECK
+      m->check_flag=0;
+  #endif
+  //printf("Uit mbuffer_free\n");
 }
 
 //Resize a memory buffer

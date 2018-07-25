@@ -32,7 +32,7 @@ chunk_t * next(Iterator * iter){
   return n->data;
 };
 void reset(Iterator * iter){
-    iter->index = iter->list->head;
+    iter->index = NULL;
 }
 int hasNext(Iterator * iter){
   return (iter->index != iter->list->tail);
