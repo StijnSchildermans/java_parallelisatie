@@ -13,10 +13,14 @@
 
 void createNNodes(int n, List * list){
   Node * newNodes = malloc(n * sizeof(Node));
+
   for (int i = 0; i < n-1; i++){
+    newNodes[i].allocated = 0;
     newNodes[i].data = NULL;
     newNodes[i].next = &newNodes[i+1];
+    newNodes[i].used = 1;
   }
+  newNodes[0].allocated = n;
   newNodes[n-1].next = NULL;
   //No non-empty elemnts
   if(list->tail == NULL) {
@@ -143,29 +147,69 @@ chunk_t * get(int index, List * list){
   return n->data;
 }
 
+int numAllocs(List * list){
+  int len = list->length;
+  if (list == NULL) return 0;
+  else if (len < 17) return 1;
+  else if (len < 33) return 2;
+  else if (len < 65) return 3;
+  else if (len < 129) return 4;
+  else if (len < 257) return 5;
+  else if (len < 513) return 6;
+  else if (len < 1025) return 7;
+  else return 7 + ((len - 1024) / 1024) + ((len % 1024 == 0) ? 0:1);
+}
+
 void destroy(List * list){
+  if (list == NULL) return;
   Node * current = list->head;
   Node * next = current;
+  Node * allocated_nodes[numAllocs(list)];
+  int allocated_index = 0;
   while(current != NULL){
     next = current->next;
-    free(current->data);
-    free(current);
+    //if (current->data != NULL) free(current->data);
+    if(current->allocated > 0){
+      allocated_nodes[allocated_index] = current;
+      allocated_index++;
+    }
+    current->used--;
     current = next;
+  }
+  for (int i = 0; i< allocated_index;i++){
+    //Node * allocated_node = allocated_nodes[i];
+    //char doubles = 0;
+    //printf("Voor loop\n");
+    //for (int j = 0; j<allocated_node->allocated; j++){
+      //printf("Aantal allocated nodes: %d\n",allocated_node->allocated);
+      //if (allocated_node[j].used > 0) doubles = 1;
+    //}
+    //printf("Na loop\n");
+    //if (!doubles){
+      //printf("Voor free\n");
+      free(allocated_nodes[i]);
+      //printf("Na free\n");
+    //}
+  }
+  //printf("Voor free list\n");
+  //free(list);
+  //printf("Na free list\n");
+}
+void destroy_soft(List * list){
+  Node * current = list->head;
+  Node * next = current;
+  //printf("Lengte lijst:%d\n",list->length);
+  while(current != NULL){
+    next = current->next;
+    //if(current->allocated) {
+      free(current);
+      //printf("Node vrijgegeven\n");
+    //}
+    current = next;
+    //printf("Node vrijgegeven\n");
   }
   free(list);
 }
-/*void destroy_soft(List * list){
-  Node * current = list->head;
-  Node * next = current;
-  printf("Lengte lijst:%d\n",list->length);
-  while(current != NULL){
-    next = current->next;
-    free(current);
-    printf("Node vrijgegeven\n");
-    current = next;
-  }
-  free(list);
-}*/
 /*void destroy_empty(List * list){
   if (list->tail == NULL) return;
   Node * current = list->tail->next;
@@ -203,6 +247,8 @@ List ** split(int n, List * list){
   //destroy_iterator(iter);
   //destroy_empty(list);
   //printf("Uit split\n");
+  free(list);
+
   return lists;
 }
 void compare(List * l1, List* l2){

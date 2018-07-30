@@ -9,6 +9,8 @@
 typedef struct node{
   chunk_t * data;
   struct node * next;
+  int allocated;
+  char used;
 } Node;
 
 typedef struct list {
