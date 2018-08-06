@@ -197,10 +197,12 @@ void mbuffer_free(mbuffer_t *m) {
   //NOTE: No need to synchronize access to ref counter value again because if it has hit 0 the buffer is dead
   if(ref==0) {
     //assert(m->mcb != NULL);
+    //printf("Vrijgeven buffer\n");
     free(m->mcb->ptr);
     m->mcb->ptr=NULL;
     free(m->mcb);
     m->mcb=NULL;
+    m->ptr = NULL;
   }
   #ifdef ENABLE_MBUFFER_CHECK
       m->check_flag=0;
@@ -228,6 +230,11 @@ int mbuffer_realloc(mbuffer_t *m, size_t size) {
   }
 
   r = realloc(m->ptr, size);
+  //void* x = m->ptr;
+  //r = malloc(size);
+  //free(m->ptr);
+
+
   if(r != NULL) {
     m->ptr = r;
     m->n = size;
@@ -258,6 +265,37 @@ int mbuffer_split(mbuffer_t *m1, mbuffer_t *m2, size_t split) {
 
   //split buffer
   m2->ptr = m1->ptr+split;
+  m2->n = m1->n-split;
+  m2->mcb = m1->mcb;
+  m1->n = split;
+#ifdef ENABLE_MBUFFER_CHECK
+  m2->check_flag=MBUFFER_CHECK_MAGIC;
+#endif
+
+  return 0;
+}
+
+int mbuffer_split_copy(mbuffer_t *m1, mbuffer_t *m2, size_t split) {
+  assert(m1!=NULL);
+  assert(m2!=NULL);
+  assert(split>0);
+  assert(split < m1->n);
+#ifdef ENABLE_MBUFFER_CHECK
+  assert(m1->check_flag==MBUFFER_CHECK_MAGIC);
+  assert(m2->check_flag!=MBUFFER_CHECK_MAGIC);
+#endif
+
+  //Update reference counter
+  assert(m1->mcb->i>=1);
+  m1->mcb->i++;
+
+  m2->ptr = malloc(split);
+  memcpy(m2->ptr, m1->ptr,split);
+
+
+
+  //split buffer
+  //m2->ptr = m1->ptr+split;
   m2->n = m1->n-split;
   m2->mcb = m1->mcb;
   m1->n = split;

@@ -2,7 +2,7 @@
 
 TARGET=dedup
 
-CFLAGS += -Wall -fno-strict-aliasing -D_XOPEN_SOURCE=600 -pthread
+CFLAGS += -Wall -fno-strict-aliasing -D_XOPEN_SOURCE=600 -pthread -g -O1 -rdynamic
 
 LIBS += -lm
 

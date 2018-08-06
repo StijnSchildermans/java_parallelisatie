@@ -1,0 +1,23 @@
+Entering fragmentation stage
+Entering refinement stage
+Entering deduplication stage
+Entering compression stage
+Total chunks: 20016
+Total chunks: 20016
+Total chunks: 20016
+Total chunks: 20016
+Total chunks: 20016
+Total chunks: 20009
+Total chunks: 20016
+Total chunks: 20016
+Entering writing stage
+Total input size:                      618.40 MB
+Total output size:                     506.84 MB
+Effective compression factor:            1.22x
+
+Total number of chunks: 160121, Duplicate chunks: 0
+Mean data chunk size:                    3.95 KB (stddev: 1593.46 KB)
+Amount of duplicate chunks:              0.00%
+Data size after deduplication:          48.01 MB (compression factor: 12.88x)
+Data size after compression:           508.11 MB (compression factor: 0.09x)
+Output overhead:               3470938065478.83%

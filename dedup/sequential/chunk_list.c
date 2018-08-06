@@ -192,7 +192,7 @@ void destroy(List * list){
     //}
   }
   //printf("Voor free list\n");
-  //free(list);
+  free(list);
   //printf("Na free list\n");
 }
 void destroy_soft(List * list){
@@ -441,7 +441,7 @@ List ** zip_split(int n, List ** lists){
     merge_empty(output[i],lists[i]);
     //printf("Na merge_empty\n");
   }
-  Node ** buffers = malloc(n*sizeof(Node *));
+  Node * buffers[n];
   int i;
   for(i=0;i<n;i++)buffers[i] = lists[i]->head;
   int len = lists[0]->length;
@@ -455,12 +455,16 @@ List ** zip_split(int n, List ** lists){
       if(buffers[j]!= NULL){
         Node * nnn = buffers[j];
         buffers[j] = nnn->next;
-        if(count == len){
+        add_node(nnn,output[out_list]);
+        count++;
+        //printf("Voor belachelijke if, i= %d, j = %d\n",i,j);
+        if((out_list < n-1) && (count >= len && ((j < n-1 && buffers[j+1] != NULL && buffers[j+1]->data->sequence.l1num != nnn->data->sequence.l1num)
+              || (j == n-1 && buffers[0] != NULL && buffers[0]->data->sequence.l1num != nnn->data->sequence.l1num)))){
+        //if (count == len){
           out_list++;
           count = 0;
         }
-        add_node(nnn,output[out_list]);
-        count++;
+        //printf("Na belachelijke if\n");
         //buffers[j] = buffers[j]->next;
       }
     }
@@ -477,9 +481,22 @@ List ** zip_split(int n, List ** lists){
   }
   printf("Totaal aantal chunks na zip_split: %d\n",len);*/
   //printf("Na loops\n");
-  for(i=0;i<n;i++) free(lists[i]);
+  for(i=0;i<n;i++){
+    free(lists[i]);
+    //printf("Lengte lijst compress: %d\n", output[i]->length);
+    //printf("I: %d, Eerste l1num: %d, laatste l1num: %d\n",i,output[i]->head->data->sequence.l1num, output[i]->tail->data->sequence.l1num);
+    //printf("Eerste  element = %p, grootte uncompressed data = %d\n",output[i]->head, output[i]->head->data->uncompressed_data.n);
+    //printf("Laatste element = %p, uncompressed data = %p, compressed data = %p\n",output[i]->tail, output[i]->tail->data->uncompressed_data.ptr, output[i]->tail->data->compressed_data);
+  }
+  //printf("Na loop\n");
+    /*if(output[i]->tail->next != NULL && output[i]->tail->next->data != NULL){
+      printf("Fout gevodnen!\n");
+      output[i]->tail->next = NULL;
+    }
+    printf("Output tail next: %p\n", output[i]->tail->next);
+  }*/
   free(lists);
-  free(buffers);
+  //free(buffers);
   //check_sequence(output);
   return output;
 }

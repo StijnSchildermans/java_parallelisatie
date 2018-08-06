@@ -84,4 +84,6 @@ int mbuffer_realloc(mbuffer_t *m, size_t size);
 //Returns 0 if the operation was successful
 int mbuffer_split(mbuffer_t *m1, mbuffer_t *m2, size_t split);
 
+int mbuffer_split_copy(mbuffer_t *m1, mbuffer_t *m2, size_t split);
+
 #endif //_MBUFFER_H_
