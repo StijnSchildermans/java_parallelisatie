@@ -1267,7 +1267,7 @@ void Encode(config_t * _conf) {
 #endif
 
 
-  threadpool pool = thpool_init(4);
+  threadpool pool = thpool_init(14);
 
   printf("Entering fragmentation stage\n");
   //fflush(stdout);
